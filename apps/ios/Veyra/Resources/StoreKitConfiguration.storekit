@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>products</key>
+    <array>
+        <dict>
+            <key>displayName</key>
+            <string>Veyra Premium Monthly</string>
+            <key>id</key>
+            <string>veyra.premium.monthly</string>
+            <key>price</key>
+            <integer>6000</integer>
+            <key>priceLocale</key>
+            <dict>
+                <key>currency</key>
+                <string>NGN</string>
+                <key>locale</key>
+                <string>en-NG</string>
+            </dict>
+            <key>subscription</key>
+            <dict>
+                <key>duration</key>
+                <string>P1M</string>
+                <key>group</key>
+                <string>veyra.premium</string>
+            </dict>
+        </dict>
+        <dict>
+            <key>displayName</key>
+            <string>Veyra Premium Yearly</string>
+            <key>id</key>
+            <string>veyra.premium.yearly</string>
+            <key>price</key>
+            <integer>60000</integer>
+            <key>priceLocale</key>
+            <dict>
+                <key>currency</key>
+                <string>NGN</string>
+                <key>locale</key>
+                <string>en-NG</string>
+            </dict>
+            <key>subscription</key>
+            <dict>
+                <key>duration</key>
+                <string>P1Y</string>
+                <key>group</key>
+                <string>veyra.premium</string>
+            </dict>
+        </dict>
+    </array>
+</dict>
+</plist>

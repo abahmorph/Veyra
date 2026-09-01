@@ -1,0 +1,41 @@
+{
+  "name": "veyra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Veyra — real-time AI video transformation platform with a virtual camera",
+  "workspaces": [
+    "packages/*",
+    "apps/desktop",
+    "server"
+  ],
+  "scripts": {
+    "build": "npm run build -w packages/shared && npm run build -w packages/engine && npm run build -w apps/desktop && npm run build -w server",
+    "build:web": "npm run build -w apps/desktop",
+    "build:server": "npm run build -w server",
+    "dev:desktop": "node scripts/dev-desktop.mjs",
+    "dev:web": "npm run dev -w apps/desktop",
+    "dev:server": "npm run dev -w server",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "npm run lint --workspaces --if-present",
+    "test": "npm run test --workspaces --if-present",
+    "test:server": "npm run test -w server",
+    "test:engine": "npm run test -w packages/engine",
+    "setup:virtual-camera": "bash scripts/setup-virtual-camera.sh",
+    "setup:virtual-mic": "bash scripts/setup-virtual-mic.sh"
+  },
+  "devDependencies": {
+    "oxlint": "^1.75.0",
+    "typescript": "^5.6.0"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "framer-motion": "^13.1.0",
+    "lucide-react": "^1.31.0",
+    "tailwindcss": "^4.3.3"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "electron@37.10.3": true,
+    "electron-winstaller@5.4.0": true
+  }
+}
