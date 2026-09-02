@@ -49,3 +49,27 @@ apps/desktop/public/mediapipe
 # Uploads / local media
 apps/desktop/data
 uploads
+
+# ---------------------------------------------------------------------------
+# VANTA iOS deployment (scripts/ios)
+# Never commit build products, archives, IPAs, or any signing secret.
+# ---------------------------------------------------------------------------
+build/
+*.xcarchive
+*.ipa
+ExportOptions.plist
+
+# App signing & distribution secrets
+*.p8
+*.cer
+*.p12
+*.mobileprovision
+*.provisionprofile
+
+# Local App Store Connect API key working dir (created by upload_testflight.sh)
+.appstoreconnect/
+
+# Derived data & Xcode user state
+DerivedData/
+xcuserdata/
+*.xcuserstate
