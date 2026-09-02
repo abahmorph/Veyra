@@ -1,0 +1,78 @@
+name: iOS Build & Test
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build and Test on macOS
+    runs-on: macos-15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.2.app
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      - name: Resolve Swift Package Dependencies (if any)
+        run: |
+          cd VeyraApp
+          xcodebuild -resolvePackageDependencies \
+            -project Veyra.xcodeproj \
+            -scheme Veyra \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
+
+      - name: Build for iOS Simulator
+        run: |
+          cd VeyraApp
+          xcodebuild build \
+            -project Veyra.xcodeproj \
+            -scheme Veyra \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Run Tests
+        run: |
+          cd VeyraApp
+          xcodebuild test \
+            -project Veyra.xcodeproj \
+            -scheme Veyra \
+            -configuration Debug \
+            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Archive app for Release
+        run: |
+          cd VeyraApp
+          xcodebuild archive \
+            -project Veyra.xcodeproj \
+            -scheme Veyra \
+            -configuration Release \
+            -archivePath build/Veyra.xcarchive \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGN_IDENTITY="" \
+            PROVISIONING_PROFILE_SPECIFIER=""
+
+      - name: Upload archive artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Veyra.xcarchive
+          path: VeyraApp/build/Veyra.xcarchive
+          if-no-files-found: error
+
+      - name: Upload dSYMs
+        uses: actions/upload-artifact@v4
+        with:
+          name: Veyra-dSYMs
+          path: VeyraApp/build/Veyra.xcarchive/dSYMs
+          if-no-files-found: ignore

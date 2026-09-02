@@ -1,0 +1,615 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		AE10A0012C1000010055AA01 /* VeyraApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0022C1000010055AA01 /* VeyraApp.swift */; };
+		AE10A0042C1000010055AA01 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0052C1000010055AA01 /* ContentView.swift */; };
+		AE10A0062C1000010055AA01 /* CameraPreviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0072C1000010055AA01 /* CameraPreviewView.swift */; };
+		AE10A0082C1000010055AA01 /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0092C1000010055AA01 /* CameraManager.swift */; };
+		AE10A00A2C1000010055AA01 /* FaceTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A00B2C1000010055AA01 /* FaceTracker.swift */; };
+		AE10A00C2C1000010055AA01 /* VeyraEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A00D2C1000010055AA01 /* VeyraEngine.swift */; };
+		AE10A00E2C1000010055AA01 /* FaceWarpEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A00F2C1000010055AA01 /* FaceWarpEngine.swift */; };
+		AE10A0102C1000010055AA01 /* BodyWarpEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0112C1000010055AA01 /* BodyWarpEngine.swift */; };
+		AE10A0122C1000010055AA01 /* MeshGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0132C1000010055AA01 /* MeshGenerator.swift */; };
+		AE10A0142C1000010055AA01 /* Smoothing.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0152C1000010055AA01 /* Smoothing.swift */; };
+		AE10A0162C1000010055AA01 /* MetalRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0172C1000010055AA01 /* MetalRenderer.swift */; };
+		AE10A0182C1000010055AA01 /* FaceLandmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0192C1000010055AA01 /* FaceLandmarks.swift */; };
+		AE10A01A2C1000010055AA01 /* BodyLandmarks.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A01B2C1000010055AA01 /* BodyLandmarks.swift */; };
+		AE10A01C2C1000010055AA01 /* TransformationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A01D2C1000010055AA01 /* TransformationSettings.swift */; };
+		AE10A01E2C1000010055AA01 /* Triangle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A01F2C1000010055AA01 /* Triangle.swift */; };
+		AE10A0202C1000010055AA01 /* FaceControlsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0212C1000010055AA01 /* FaceControlsPanel.swift */; };
+		AE10A0222C1000010055AA01 /* BodyControlsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0232C1000010055AA01 /* BodyControlsPanel.swift */; };
+		AE10A0242C1000010055AA01 /* EffectsPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A0252C1000010055AA01 /* EffectsPanel.swift */; };
+		AE10A02A2C1000010055AA01 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = AE10A02B2C1000010055AA01 /* Shaders.metal */; };
+		AE10A0302C1000010055AA01 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AE10A0312C1000010055AA01 /* Assets.xcassets */; };
+		AE10A1012C1000010055AA01 /* VeyraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A1052C1000010055AA01 /* VeyraTests.swift */; };
+		AE10A1022C1000010055AA01 /* MeshGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A1062C1000010055AA01 /* MeshGeneratorTests.swift */; };
+		AE10A1032C1000010055AA01 /* FaceWarpEngineTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A1072C1000010055AA01 /* FaceWarpEngineTests.swift */; };
+		AE10A1042C1000010055AA01 /* TransformationSettingsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A1082C1000010055AA01 /* TransformationSettingsTests.swift */; };
+		AE10A1102C1000010055AA01 /* BodyTracker.swift in Sources */ = {isa = PBXBuildFile; fileRef = AE10A1112C1000010055AA01 /* BodyTracker.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AE10A0022C1000010055AA01 /* VeyraApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/App/VeyraApp.swift"; sourceTree = "<group>"; };
+		AE10A0052C1000010055AA01 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Views/ContentView.swift"; sourceTree = "<group>"; };
+		AE10A0072C1000010055AA01 /* CameraPreviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Views/CameraPreviewView.swift"; sourceTree = "<group>"; };
+		AE10A0092C1000010055AA01 /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Camera/CameraManager.swift"; sourceTree = "<group>"; };
+		AE10A00B2C1000010055AA01 /* FaceTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Tracking/FaceTracker.swift"; sourceTree = "<group>"; };
+		AE10A00D2C1000010055AA01 /* VeyraEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Engine/VeyraEngine.swift"; sourceTree = "<group>"; };
+		AE10A00F2C1000010055AA01 /* FaceWarpEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Engine/FaceWarpEngine.swift"; sourceTree = "<group>"; };
+		AE10A0112C1000010055AA01 /* BodyWarpEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Engine/BodyWarpEngine.swift"; sourceTree = "<group>"; };
+		AE10A0132C1000010055AA01 /* MeshGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Engine/MeshGenerator.swift"; sourceTree = "<group>"; };
+		AE10A0152C1000010055AA01 /* Smoothing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Engine/Smoothing.swift"; sourceTree = "<group>"; };
+		AE10A0172C1000010055AA01 /* MetalRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Rendering/MetalRenderer.swift"; sourceTree = "<group>"; };
+		AE10A0192C1000010055AA01 /* FaceLandmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/FaceLandmarks.swift"; sourceTree = "<group>"; };
+		AE10A01B2C1000010055AA01 /* BodyLandmarks.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/BodyLandmarks.swift"; sourceTree = "<group>"; };
+		AE10A01D2C1000010055AA01 /* TransformationSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/TransformationSettings.swift"; sourceTree = "<group>"; };
+		AE10A01F2C1000010055AA01 /* Triangle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Models/Triangle.swift"; sourceTree = "<group>"; };
+		AE10A0212C1000010055AA01 /* FaceControlsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Views/FaceControlsPanel.swift"; sourceTree = "<group>"; };
+		AE10A0232C1000010055AA01 /* BodyControlsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Views/BodyControlsPanel.swift"; sourceTree = "<group>"; };
+		AE10A0252C1000010055AA01 /* EffectsPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Sources/Views/EffectsPanel.swift"; sourceTree = "<group>"; };
+		AE10A02B2C1000010055AA01 /* Shaders.metal */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.metal; path = "Sources/Shaders/Shaders.metal"; sourceTree = "<group>"; };
+		AE10A0312C1000010055AA01 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Resources/Assets.xcassets"; sourceTree = "<group>"; };
+		AE10A0332C1000010055AA01 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "Resources/Info.plist"; sourceTree = "<group>"; };
+		AE10A0352C1000010055AA01 /* Veyra.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Veyra.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE10A0372C1000010055AA01 /* VeyraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VeyraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AE10A1052C1000010055AA01 /* VeyraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VeyraTests.swift; sourceTree = "<group>"; };
+		AE10A1062C1000010055AA01 /* MeshGeneratorTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MeshGeneratorTests.swift; sourceTree = "<group>"; };
+		AE10A1072C1000010055AA01 /* FaceWarpEngineTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FaceWarpEngineTests.swift; sourceTree = "<group>"; };
+		AE10A1082C1000010055AA01 /* TransformationSettingsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TransformationSettingsTests.swift; sourceTree = "<group>"; };
+		AE10A1112C1000010055AA01 /* BodyTracker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BodyTracker.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		AE10A02E2C1000010055AA01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AE10A0382C1000010055AA01 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		AE10A0392C1000010055AA01 = {
+			isa = PBXGroup;
+			children = (
+				AE10A03A2C1000010055AA01 /* Veyra */,
+				AE10A03B2C1000010055AA01 /* VeyraTests */,
+				AE10A03C2C1000010055AA01 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		AE10A03A2C1000010055AA01 /* Veyra */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A03D2C1000010055AA01 /* Sources */,
+				AE10A0312C1000010055AA01 /* Assets.xcassets */,
+				AE10A0332C1000010055AA01 /* Info.plist */,
+			);
+			path = Veyra;
+			sourceTree = "<group>";
+		};
+		AE10A03D2C1000010055AA01 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A03E2C1000010055AA01 /* App */,
+				AE10A03F2C1000010055AA01 /* Views */,
+				AE10A0402C1000010055AA01 /* Camera */,
+				AE10A0412C1000010055AA01 /* Tracking */,
+				AE10A0422C1000010055AA01 /* Engine */,
+				AE10A0432C1000010055AA01 /* Rendering */,
+				AE10A0442C1000010055AA01 /* Shaders */,
+				AE10A0452C1000010055AA01 /* Models */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		AE10A03E2C1000010055AA01 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A0022C1000010055AA01 /* VeyraApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		AE10A03F2C1000010055AA01 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A0052C1000010055AA01 /* ContentView.swift */,
+				AE10A0072C1000010055AA01 /* CameraPreviewView.swift */,
+				AE10A0212C1000010055AA01 /* FaceControlsPanel.swift */,
+				AE10A0232C1000010055AA01 /* BodyControlsPanel.swift */,
+				AE10A0252C1000010055AA01 /* EffectsPanel.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		AE10A0402C1000010055AA01 /* Camera */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A0092C1000010055AA01 /* CameraManager.swift */,
+			);
+			path = Camera;
+			sourceTree = "<group>";
+		};
+		AE10A0412C1000010055AA01 /* Tracking */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A00B2C1000010055AA01 /* FaceTracker.swift */,
+				AE10A1112C1000010055AA01 /* BodyTracker.swift */,
+			);
+			path = Tracking;
+			sourceTree = "<group>";
+		};
+		AE10A0422C1000010055AA01 /* Engine */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A00D2C1000010055AA01 /* VeyraEngine.swift */,
+				AE10A00F2C1000010055AA01 /* FaceWarpEngine.swift */,
+				AE10A0112C1000010055AA01 /* BodyWarpEngine.swift */,
+				AE10A0132C1000010055AA01 /* MeshGenerator.swift */,
+				AE10A0152C1000010055AA01 /* Smoothing.swift */,
+			);
+			path = Engine;
+			sourceTree = "<group>";
+		};
+		AE10A0432C1000010055AA01 /* Rendering */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A0172C1000010055AA01 /* MetalRenderer.swift */,
+			);
+			path = Rendering;
+			sourceTree = "<group>";
+		};
+		AE10A0442C1000010055AA01 /* Shaders */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A02B2C1000010055AA01 /* Shaders.metal */,
+			);
+			path = Shaders;
+			sourceTree = "<group>";
+		};
+		AE10A0452C1000010055AA01 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A0192C1000010055AA01 /* FaceLandmarks.swift */,
+				AE10A01B2C1000010055AA01 /* BodyLandmarks.swift */,
+				AE10A01D2C1000010055AA01 /* TransformationSettings.swift */,
+				AE10A01F2C1000010055AA01 /* Triangle.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		AE10A03B2C1000010055AA01 /* VeyraTests */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A1052C1000010055AA01 /* VeyraTests.swift */,
+				AE10A1062C1000010055AA01 /* MeshGeneratorTests.swift */,
+				AE10A1072C1000010055AA01 /* FaceWarpEngineTests.swift */,
+				AE10A1082C1000010055AA01 /* TransformationSettingsTests.swift */,
+			);
+			path = VeyraTests;
+			sourceTree = "<group>";
+		};
+		AE10A03C2C1000010055AA01 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AE10A0352C1000010055AA01 /* Veyra.app */,
+				AE10A0372C1000010055AA01 /* VeyraTests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		AE10A03D2C1000010055AA02 /* Veyra */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE10A0462C1000010055AA01 /* Build configuration list for PBXNativeTarget "Veyra" */;
+			buildPhases = (
+				AE10A0472C1000010055AA01 /* Sources */,
+				AE10A02E2C1000010055AA01 /* Frameworks */,
+				AE10A0482C1000010055AA01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Veyra;
+			productName = Veyra;
+			productReference = AE10A0352C1000010055AA01 /* Veyra.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AE10A0492C1000010055AA01 /* VeyraTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AE10A04A2C1000010055AA01 /* Build configuration list for PBXNativeTarget "VeyraTests" */;
+			buildPhases = (
+				AE10A04B2C1000010055AA01 /* Sources */,
+				AE10A0382C1000010055AA01 /* Frameworks */,
+				AE10A04C2C1000010055AA01 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AE10A04D2C1000010055AA01 /* PBXTargetDependency */,
+			);
+			name = VeyraTests;
+			productName = VeyraTests;
+			productReference = AE10A0372C1000010055AA01 /* VeyraTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		AE10A04E2C1000010055AA01 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+				TargetAttributes = {
+					AE10A03D2C1000010055AA02 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+					AE10A0492C1000010055AA01 = {
+						CreatedOnToolsVersion = 15.0;
+						TestTargetID = AE10A03D2C1000010055AA02;
+					};
+				};
+			};
+			buildConfigurationList = AE10A04F2C1000010055AA01 /* Build configuration list for PBXProject "Veyra" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = AE10A0392C1000010055AA01;
+			productRefGroup = AE10A03C2C1000010055AA01 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				AE10A03D2C1000010055AA02 /* Veyra */,
+				AE10A0492C1000010055AA01 /* VeyraTests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		AE10A0482C1000010055AA01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AE10A0302C1000010055AA01 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AE10A04C2C1000010055AA01 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		AE10A0472C1000010055AA01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AE10A0012C1000010055AA01 /* VeyraApp.swift in Sources */,
+				AE10A0042C1000010055AA01 /* ContentView.swift in Sources */,
+				AE10A0062C1000010055AA01 /* CameraPreviewView.swift in Sources */,
+				AE10A0082C1000010055AA01 /* CameraManager.swift in Sources */,
+				AE10A00A2C1000010055AA01 /* FaceTracker.swift in Sources */,
+				AE10A1102C1000010055AA01 /* BodyTracker.swift in Sources */,
+				AE10A00C2C1000010055AA01 /* VeyraEngine.swift in Sources */,
+				AE10A00E2C1000010055AA01 /* FaceWarpEngine.swift in Sources */,
+				AE10A0102C1000010055AA01 /* BodyWarpEngine.swift in Sources */,
+				AE10A0122C1000010055AA01 /* MeshGenerator.swift in Sources */,
+				AE10A0142C1000010055AA01 /* Smoothing.swift in Sources */,
+				AE10A0162C1000010055AA01 /* MetalRenderer.swift in Sources */,
+				AE10A0182C1000010055AA01 /* FaceLandmarks.swift in Sources */,
+				AE10A01A2C1000010055AA01 /* BodyLandmarks.swift in Sources */,
+				AE10A01C2C1000010055AA01 /* TransformationSettings.swift in Sources */,
+				AE10A01E2C1000010055AA01 /* Triangle.swift in Sources */,
+				AE10A0202C1000010055AA01 /* FaceControlsPanel.swift in Sources */,
+				AE10A0222C1000010055AA01 /* BodyControlsPanel.swift in Sources */,
+				AE10A0242C1000010055AA01 /* EffectsPanel.swift in Sources */,
+				AE10A02A2C1000010055AA01 /* Shaders.metal in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AE10A04B2C1000010055AA01 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AE10A1012C1000010055AA01 /* VeyraTests.swift in Sources */,
+				AE10A1022C1000010055AA01 /* MeshGeneratorTests.swift in Sources */,
+				AE10A1032C1000010055AA01 /* FaceWarpEngineTests.swift in Sources */,
+				AE10A1042C1000010055AA01 /* TransformationSettingsTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		AE10A04D2C1000010055AA01 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AE10A03D2C1000010055AA02 /* Veyra */;
+			targetProxy = AE10A0502C1000010055AA01 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin PBXContainerItemProxy section */
+		AE10A0502C1000010055AA01 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AE10A04E2C1000010055AA01 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AE10A03D2C1000010055AA02;
+			remoteInfo = Veyra;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin XCBuildConfiguration section */
+		AE10A0512C1000010055AA01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AE10A0522C1000010055AA01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AE10A0532C1000010055AA01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Veyra/Resources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.veyra.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		AE10A0542C1000010055AA01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "";
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Veyra/Resources/Info.plist;
+				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleLightContent;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.veyra.app;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AE10A0552C1000010055AA01 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.veyra.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Veyra.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Veyra";
+			};
+			name = Debug;
+		};
+		AE10A0562C1000010055AA01 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.veyra.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Veyra.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Veyra";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		AE10A04F2C1000010055AA01 /* Build configuration list for PBXProject "Veyra" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AE10A0512C1000010055AA01 /* Debug */,
+				AE10A0522C1000010055AA01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AE10A0462C1000010055AA01 /* Build configuration list for PBXNativeTarget "Veyra" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AE10A0532C1000010055AA01 /* Debug */,
+				AE10A0542C1000010055AA01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AE10A04A2C1000010055AA01 /* Build configuration list for PBXNativeTarget "VeyraTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AE10A0552C1000010055AA01 /* Debug */,
+				AE10A0562C1000010055AA01 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = AE10A04E2C1000010055AA01 /* Project object */;
+}
