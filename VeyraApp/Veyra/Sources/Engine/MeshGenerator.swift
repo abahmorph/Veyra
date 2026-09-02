@@ -107,25 +107,34 @@ public struct MeshGenerator {
     }
     
     private static func deduplicateEdges(_ edges: [CGPoint]) -> [[CGPoint]] {
-        var unique: [[CGPoint]] = []
-        var used: Set<String> = []
-        
+        var pairs: [[CGPoint]] = []
         var i = 0
         while i < edges.count - 1 {
-            let p1 = edges[i]
-            let p2 = edges[i + 1]
-            let key1 = "\(Int(p1.x * 100)),\(Int(p1.y * 100))"
-            let key2 = "\(Int(p2.x * 100)),\(Int(p2.y * 100))"
-            let edgeKey = key1 < key2 ? "\(key1)-\(key2)" : "\(key2)-\(key1)"
-            
-            if !used.contains(edgeKey) {
-                used.insert(edgeKey)
-                unique.append([p1, p2])
-            }
+            pairs.append([edges[i], edges[i + 1]])
             i += 2
         }
-        
+
+        // Key each undirected edge canonically and count how often it appears.
+        var counts: [String: Int] = [:]
+        let keys = pairs.map { pair -> String in
+            let k1 = edgeCoordKey(pair[0])
+            let k2 = edgeCoordKey(pair[1])
+            return k1 < k2 ? "\(k1)-\(k2)" : "\(k2)-\(k1)"
+        }
+        for k in keys { counts[k, default: 0] += 1 }
+
+        // In Bowyer-Watson, an edge shared by two removed triangles is interior
+        // and must be discarded; only edges appearing exactly once (the boundary
+        // of the hole polygon) are kept.
+        var unique: [[CGPoint]] = []
+        for (index, pair) in pairs.enumerated() where counts[keys[index]] == 1 {
+            unique.append(pair)
+        }
         return unique
+    }
+
+    private static func edgeCoordKey(_ p: CGPoint) -> String {
+        return "\(Int(p.x * 1000)),\(Int(p.y * 1000))"
     }
     
     private static func isSamePoint(_ a: CGPoint, _ b: CGPoint) -> Bool {
