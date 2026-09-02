@@ -86,10 +86,16 @@ public struct BodyWarpEngine {
     }
     
     private func createBodyRegion(mask: CIImage, extent: CGRect) -> CIImage? {
-        let blendFilter = CIFilter.blendWithMask()
-        blendFilter.inputImage = CIImage(color: CIColor(red: 1, green: 1, blue: 1, alpha: 1)).cropped(to: extent)
-        blendFilter.backgroundImage = CIImage(color: CIColor(red: 0, green: 0, blue: 0, alpha: 1)).cropped(to: extent)
-        blendFilter.maskImage = mask
+        guard let blendFilter = CIFilter(name: "CIBlendWithMask") else { return nil }
+        blendFilter.setValue(
+            CIImage(color: CIColor(red: 1, green: 1, blue: 1, alpha: 1)).cropped(to: extent),
+            forKey: kCIInputImageKey
+        )
+        blendFilter.setValue(
+            CIImage(color: CIColor(red: 0, green: 0, blue: 0, alpha: 1)).cropped(to: extent),
+            forKey: kCIInputBackgroundImageKey
+        )
+        blendFilter.setValue(mask, forKey: kCIInputMaskImageKey)
         return blendFilter.outputImage
     }
     
@@ -101,15 +107,14 @@ public struct BodyWarpEngine {
         radius: CGFloat,
         extent: CGRect
     ) -> CIImage {
-        guard scale != 1.0 else { return image }
+        guard scale != 1.0, let displacementFilter = CIFilter(name: "CIDisplacementDistortion") else { return image }
         
         // Displacement-based warp: shift pixels horizontally based on distance from center
-        let displacementFilter = CIFilter.displacementDistortion()
-        displacementFilter.inputImage = image
-        displacementFilter.displacementImage = region
+        displacementFilter.setValue(image, forKey: kCIInputImageKey)
+        displacementFilter.setValue(region, forKey: kCIInputDisplacementImageKey)
         
         let strength = (scale - 1.0) * 20.0
-        displacementFilter.scale = strength
+        displacementFilter.setValue(strength, forKey: kCIInputScaleKey)
         
         return displacementFilter.outputImage ?? image
     }
@@ -121,14 +126,13 @@ public struct BodyWarpEngine {
         scale: CGFloat,
         extent: CGRect
     ) -> CIImage {
-        guard scale != 1.0 else { return image }
+        guard scale != 1.0, let displacementFilter = CIFilter(name: "CIDisplacementDistortion") else { return image }
         
-        let displacementFilter = CIFilter.displacementDistortion()
-        displacementFilter.inputImage = image
-        displacementFilter.displacementImage = region
+        displacementFilter.setValue(image, forKey: kCIInputImageKey)
+        displacementFilter.setValue(region, forKey: kCIInputDisplacementImageKey)
         
         let strength = (scale - 1.0) * 15.0
-        displacementFilter.scale = strength
+        displacementFilter.setValue(strength, forKey: kCIInputScaleKey)
         
         return displacementFilter.outputImage ?? image
     }

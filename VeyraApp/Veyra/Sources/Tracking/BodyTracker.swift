@@ -15,7 +15,6 @@ public actor BodyTracker {
 
     public func configure() {
         let seg = VNGeneratePersonSegmentationRequest()
-        seg.revision = VNGeneratePersonSegmentationRequestRevision2
         seg.qualityLevel = .balanced
         seg.outputPixelFormat = kCVPixelFormatType_OneComponent8
         segmentationRequest = seg
@@ -47,7 +46,7 @@ public actor BodyTracker {
             return (nil, nil)
         }
 
-        let mask = segmentationRequest?.result?.pixelBuffer
+        let mask = (segmentationRequest?.results?.first as? VNPixelBufferObservation)?.pixelBuffer
 
         let bodyData: BodyLandmarkData?
         if let observation = detectBodyRequest?.results?.first {

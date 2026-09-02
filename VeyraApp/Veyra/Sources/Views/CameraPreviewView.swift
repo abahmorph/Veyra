@@ -65,7 +65,8 @@ struct CameraPreviewView: UIViewRepresentable {
 
         func draw(in view: MTKView) {
             guard let drawable = view.currentDrawable,
-                  let commandQueue = view.commandQueue,
+                  let device = view.device,
+                  let commandQueue = device.makeCommandQueue(),
                   let image = store.current() else {
                 view.currentDrawable?.present()
                 return
