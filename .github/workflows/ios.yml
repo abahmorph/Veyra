@@ -21,6 +21,18 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: List installed Xcode toolchains and iOS SDKs
+        run: |
+          echo "== INSTALLED XCODE APPS =="
+          ls /Applications | grep -i xcode || true
+          echo "== XCODEAPP SHORT VERSIONS / SDKs =="
+          for app in /Applications/Xcode*.app; do
+            [ -e "$app" ] || continue
+            echo "--- $app ---"
+            "$app/Contents/Developer/usr/bin/xcodebuild" -version 2>/dev/null
+            "$app/Contents/Developer/usr/bin/xcodebuild" -showsdks 2>/dev/null | grep -i "ios " | head -3
+          done
+
       - name: Resolve Swift Package Dependencies (if any)
         run: |
           cd VeyraApp
