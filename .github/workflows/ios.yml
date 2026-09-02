@@ -21,13 +21,20 @@ jobs:
       - name: Show Xcode version
         run: xcodebuild -version
 
+      - name: List available simulator runtimes and devices
+        run: |
+          echo "== RUNTIMES =="
+          xcrun simctl list runtimes 2>&1 || true
+          echo "== AVAILABLE DEVICES =="
+          xcrun simctl list devices available 2>&1 || true
+
       - name: Resolve Swift Package Dependencies (if any)
         run: |
           cd VeyraApp
           xcodebuild -resolvePackageDependencies \
             -project Veyra.xcodeproj \
             -scheme Veyra \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro'
+            -destination 'generic/platform=iOS Simulator'
 
       - name: Build for iOS Simulator
         run: |
@@ -36,7 +43,7 @@ jobs:
             -project Veyra.xcodeproj \
             -scheme Veyra \
             -configuration Debug \
-            -destination 'platform=iOS Simulator,name=iPhone 16 Pro' \
+            -destination 'generic/platform=iOS Simulator' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO
 
