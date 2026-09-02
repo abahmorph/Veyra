@@ -111,7 +111,7 @@ public struct BodyWarpEngine {
         
         // Displacement-based warp: shift pixels horizontally based on distance from center
         displacementFilter.setValue(image, forKey: kCIInputImageKey)
-        displacementFilter.setValue(region, forKey: kCIInputDisplacementImageKey)
+        displacementFilter.setValue(region, forKey: "inputDisplacementImage")
         
         let strength = (scale - 1.0) * 20.0
         displacementFilter.setValue(strength, forKey: kCIInputScaleKey)
@@ -129,7 +129,7 @@ public struct BodyWarpEngine {
         guard scale != 1.0, let displacementFilter = CIFilter(name: "CIDisplacementDistortion") else { return image }
         
         displacementFilter.setValue(image, forKey: kCIInputImageKey)
-        displacementFilter.setValue(region, forKey: kCIInputDisplacementImageKey)
+        displacementFilter.setValue(region, forKey: "inputDisplacementImage")
         
         let strength = (scale - 1.0) * 15.0
         displacementFilter.setValue(strength, forKey: kCIInputScaleKey)
