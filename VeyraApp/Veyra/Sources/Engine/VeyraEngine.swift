@@ -5,6 +5,7 @@ import CoreMedia
 import Metal
 import SwiftUI
 import Combine
+import UIKit
 
 /// A background processor that performs heavy per-frame work
 /// (tracking, warping, effects) off the main actor.
@@ -14,6 +15,7 @@ actor FrameProcessor {
     private let smoother = TemporalSmoother(smoothingFactor: 0.35)
     private let faceWarpEngine = FaceWarpEngine()
     private let bodyWarpEngine = BodyWarpEngine()
+    private let faceReplaceEngine = FaceReplaceEngine()
     private var metalRenderer: MetalRenderer?
 
     private var lastFrameTime: CFAbsoluteTime = 0
@@ -43,7 +45,10 @@ actor FrameProcessor {
         mirrored: Bool,
         faceSettings: FaceTransformSettings,
         bodySettings: BodyTransformSettings,
-        effect: String
+        effect: String,
+        referenceFace: ReferenceFace?,
+        faceReplaceEnabled: Bool,
+        faceReplaceBlend: Double
     ) async {
         let now = CFAbsoluteTimeGetCurrent()
         let interval = now - lastFrameTime
@@ -71,7 +76,15 @@ actor FrameProcessor {
         var faceLandmarkData: FaceLandmarkData?
         if let result = smoothedResult {
             hasFace = true
-            sourceLandmarks = result.landmarks.allPoints
+            // Vision face-landmark points are normalized to the face bounding
+            // box; combine with the box to get pixel coordinates.
+            let bb = result.landmarks.boundingBox
+            let pixelWidth = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
+            let pixelHeight = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
+            sourceLandmarks = result.landmarks.allPoints.map { point in
+                CGPoint(x: (point.x * bb.width + bb.minX) * pixelWidth,
+                        y: (point.y * bb.height + bb.minY) * pixelHeight)
+            }
             faceLandmarkData = result.landmarks
         }
 
@@ -99,18 +112,28 @@ actor FrameProcessor {
             outputImage = outputImage.oriented(.upMirrored)
         }
 
-        // 5. Face geometric transformation
+        // 5. Reference-face replacement (applied before reshaping so the
+        // geometric reshape also affects the swapped face).
+        if faceReplaceEnabled, let reference = referenceFace, hasFace, sourceLandmarks.count >= 3 {
+            outputImage = faceReplaceEngine.replaceFace(
+                in: outputImage,
+                liveLandmarks: sourceLandmarks,
+                reference: reference,
+                blend: faceReplaceBlend
+            )
+        }
+
+        // 6. Face geometric transformation
         if hasFace, faceSettings.hasModifications, !sourceLandmarks.isEmpty {
-            let sourcePts = sourceLandmarks.map { CGPoint(x: $0.x * width, y: $0.y * height) }
             let targetPts = faceWarpEngine.computeWarpedLandmarks(
-                originalLandmarks: sourcePts,
+                originalLandmarks: sourceLandmarks,
                 settings: faceSettings,
                 imageWidth: width,
                 imageHeight: height
             )
             outputImage = faceWarpEngine.warpImage(
                 outputImage,
-                sourceLandmarks: sourcePts,
+                sourceLandmarks: sourceLandmarks,
                 targetLandmarks: targetPts
             )
         }
@@ -167,6 +190,11 @@ public final class VeyraEngine: ObservableObject {
     }
     @Published public var previewImage: CIImage?
 
+    @Published public var referenceFace: ReferenceFace?
+    @Published public var faceReplaceEnabled = false
+    @Published public var faceReplaceBlend: Double = 1.0
+    @Published public var referenceError: String?
+
     public let cameraManager = CameraManager()
 
     private var processor: FrameProcessor?
@@ -211,6 +239,9 @@ public final class VeyraEngine: ObservableObject {
             let fSettings = self.faceSettings
             let bSettings = self.bodySettings
             let effect = self.currentEffect
+            let reference = self.referenceFace
+            let replaceEnabled = self.faceReplaceEnabled && self.referenceFace != nil
+            let replaceBlend = self.faceReplaceBlend
             let captured = self.processor
             Task {
                 await captured?.process(
@@ -218,7 +249,10 @@ public final class VeyraEngine: ObservableObject {
                     mirrored: mirrored,
                     faceSettings: fSettings,
                     bodySettings: bSettings,
-                    effect: effect
+                    effect: effect,
+                    referenceFace: reference,
+                    faceReplaceEnabled: replaceEnabled,
+                    faceReplaceBlend: replaceBlend
                 )
             }
         }
@@ -254,6 +288,33 @@ public final class VeyraEngine: ObservableObject {
 
     public func setEffect(_ effect: String) {
         currentEffect = effect
+    }
+
+    /// Decodes a picked photo, detects its face and prepares it as the swap
+    /// reference. Runs the Vision detection off the main actor.
+    public func loadReferenceFace(from data: Data) async {
+        guard let uiImage = UIImage(data: data), let ciImage = CIImage(image: uiImage) else {
+            referenceError = "Could not read that photo."
+            return
+        }
+        let prepared = await Task.detached(priority: .userInitiated) {
+            FaceReplaceEngine().prepareReferenceFace(from: ciImage)
+        }.value
+
+        if let prepared = prepared {
+            referenceFace = prepared
+            referenceError = nil
+            faceReplaceEnabled = true
+        } else {
+            referenceFace = nil
+            referenceError = "No face detected in that photo."
+        }
+    }
+
+    public func clearReferenceFace() {
+        referenceFace = nil
+        referenceError = nil
+        faceReplaceEnabled = false
     }
 
     private func saveSettings() {
