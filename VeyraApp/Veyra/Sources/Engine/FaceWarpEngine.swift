@@ -263,6 +263,14 @@ public struct FaceWarpEngine {
 
         context.clear(CGRect(origin: .zero, size: targetSize))
 
+        // Draw the untouched frame first so regions outside the face mesh are
+        // preserved instead of dropping to transparent.
+        context.saveGState()
+        context.translateBy(x: 0, y: targetSize.height)
+        context.scaleBy(x: 1.0, y: -1.0)
+        context.draw(cgImage, in: CGRect(origin: .zero, size: targetSize))
+        context.restoreGState()
+
         for triangle in triangles {
             guard triangle.src.count >= 3, triangle.dst.count >= 3 else { continue }
 

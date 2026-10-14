@@ -20,10 +20,12 @@ actor FrameProcessor {
     private var frameCount: Int = 0
     private var lastProcessingMs: Double = 0
     private var pipelineRun: UInt64 = 0
+    private var lastBodyMask: CVPixelBuffer?
+    private var droppedFrames: Int = 0
 
-    private var frameHandler: (@Sendable (CIImage, Bool, Double) -> Void)?
+    private var frameHandler: (@Sendable (CIImage, Bool, Double, Int) -> Void)?
 
-    func setFrameHandler(_ handler: @escaping @Sendable (CIImage, Bool, Double) -> Void) {
+    func setFrameHandler(_ handler: @escaping @Sendable (CIImage, Bool, Double, Int) -> Void) {
         frameHandler = handler
     }
 
@@ -73,11 +75,18 @@ actor FrameProcessor {
             faceLandmarkData = result.landmarks
         }
 
-        // 3. Body tracking (throttled) used when body transform is active
+        // 3. Body tracking (throttled) used when body transform is active.
+        // Keep the most recent mask so throttled frames still apply the body
+        // transform instead of silently dropping it.
         var bodyMask: CVPixelBuffer?
         if bodySettings.hasModifications {
             let body = await bodyTracker.track(pixelBuffer, throttleMs: 100)
-            bodyMask = body.mask
+            if let newMask = body.mask {
+                lastBodyMask = newMask
+            }
+            bodyMask = body.mask ?? lastBodyMask
+        } else {
+            lastBodyMask = nil
         }
 
         // 4. Build the working image
@@ -125,12 +134,17 @@ actor FrameProcessor {
 
         lastProcessingMs = (CFAbsoluteTimeGetCurrent() - startMs) * 1000
 
-        // Publish the latest frame only
-        guard thisRun == pipelineRun else { return }
+        // Publish the latest frame only. Frames superseded by a newer one were
+        // effectively dropped by the pipeline, so surface that honestly.
+        guard thisRun == pipelineRun else {
+            droppedFrames += 1
+            return
+        }
         let finalImage = outputImage
         let finalHasFace = hasFace
         let finalMs = lastProcessingMs
-        frameHandler?(finalImage, finalHasFace, finalMs)
+        let finalDropped = droppedFrames
+        frameHandler?(finalImage, finalHasFace, finalMs, finalDropped)
     }
 }
 
@@ -168,7 +182,7 @@ public final class VeyraEngine: ObservableObject {
 
         Task { @MainActor in
             await proc.configure()
-            await proc.setFrameHandler { [weak self] image, hasFace, ms in
+            await proc.setFrameHandler { [weak self] image, hasFace, ms, dropped in
                 Task { @MainActor in
                     guard let self else { return }
                     self.fpsCounter += 1
@@ -184,7 +198,7 @@ public final class VeyraEngine: ObservableObject {
                     self.performanceStats = PerformanceStats(
                         fps: self.currentFPS,
                         processingMs: ms,
-                        droppedFrames: 0
+                        droppedFrames: dropped
                     )
                 }
             }

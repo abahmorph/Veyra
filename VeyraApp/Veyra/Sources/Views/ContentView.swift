@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var engine: VeyraEngine
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selectedTab: Tab = .studio
     @State private var showControls = false
     
@@ -35,6 +36,18 @@ struct ContentView: View {
         }
         .onDisappear {
             engine.stop()
+        }
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                Task { await engine.start() }
+            case .background:
+                engine.stop()
+            case .inactive:
+                break
+            @unknown default:
+                break
+            }
         }
     }
     
