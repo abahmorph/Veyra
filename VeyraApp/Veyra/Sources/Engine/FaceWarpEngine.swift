@@ -1,6 +1,7 @@
 import Foundation
 import CoreGraphics
 import CoreImage
+import Vision
 
 public struct FaceWarpEngine {
 
@@ -120,10 +121,30 @@ public struct FaceWarpEngine {
         sourceLandmarks: [CGPoint],
         targetLandmarks: [CGPoint]
     ) -> CIImage {
+        return warpImage(
+            source,
+            sourceLandmarks: sourceLandmarks,
+            targetLandmarks: targetLandmarks,
+            outputSize: source.extent.size,
+            drawBase: true
+        )
+    }
+
+    /// Warps `source` through the triangle mesh that maps `sourceLandmarks` to
+    /// `targetLandmarks`, into an output of `outputSize`. When `drawBase` is
+    /// false only the warped triangles are drawn (used when the result is later
+    /// composited through a mask, e.g. face replacement).
+    public func warpImage(
+        _ source: CIImage,
+        sourceLandmarks: [CGPoint],
+        targetLandmarks: [CGPoint],
+        outputSize: CGSize,
+        drawBase: Bool
+    ) -> CIImage {
         let triangles = MeshGenerator.triangulateKeyLandmarks(source: sourceLandmarks, target: targetLandmarks)
         guard !triangles.isEmpty else { return source }
 
-        return applyWarp(source: source, triangles: triangles, targetSize: source.extent.size)
+        return applyWarp(source: source, triangles: triangles, targetSize: outputSize, drawBase: drawBase)
     }
 
     // MARK: - Feature-Specific Helpers
@@ -248,7 +269,7 @@ public struct FaceWarpEngine {
 
     // MARK: - Affine Transform per Triangle
 
-    private func applyWarp(source: CIImage, triangles: [Triangle], targetSize: CGSize) -> CIImage {
+    private func applyWarp(source: CIImage, triangles: [Triangle], targetSize: CGSize, drawBase: Bool = true) -> CIImage {
         guard let context = CGContext(
             data: nil,
             width: Int(targetSize.width),
@@ -262,6 +283,16 @@ public struct FaceWarpEngine {
         guard let cgImage = ciContext.createCGImage(source, from: source.extent) else { return source }
 
         context.clear(CGRect(origin: .zero, size: targetSize))
+
+        // Draw the untouched frame first so regions outside the face mesh are
+        // preserved instead of dropping to transparent.
+        if drawBase {
+            context.saveGState()
+            context.translateBy(x: 0, y: targetSize.height)
+            context.scaleBy(x: 1.0, y: -1.0)
+            context.draw(cgImage, in: CGRect(origin: .zero, size: targetSize))
+            context.restoreGState()
+        }
 
         for triangle in triangles {
             guard triangle.src.count >= 3, triangle.dst.count >= 3 else { continue }
@@ -306,5 +337,190 @@ public struct FaceWarpEngine {
         let ty = (x1 * (y2 * v3 - y3 * v2) + x2 * (y3 * v1 - y1 * v3) + x3 * (y1 * v2 - y2 * v1)) / det
 
         return CGAffineTransform(a: a, b: b, c: c, d: d, tx: tx, ty: ty)
+    }
+}
+
+// MARK: - Reference Face Replacement
+
+/// A prepared reference face: a cropped patch of a reference photo together
+/// with its detected landmarks expressed in the patch's own pixel space.
+public struct ReferenceFace: @unchecked Sendable {
+    public let patch: CIImage
+    /// Landmark points in patch pixel coordinates (origin lower-left).
+    public let landmarks: [CGPoint]
+    /// The patch rectangle within the original reference image.
+    public let patchRect: CGRect
+
+    public init(patch: CIImage, landmarks: [CGPoint], patchRect: CGRect) {
+        self.patch = patch
+        self.landmarks = landmarks
+        self.patchRect = patchRect
+    }
+}
+
+/// Replaces the live face with a reference photo's face using a real geometric
+/// pipeline: the reference patch is warped onto the live face's landmark mesh
+/// and composited through a feathered face-region mask. This is a classical
+/// alignment/warp swap (no generative model).
+public struct FaceReplaceEngine {
+
+    private let ciContext = CIContext(options: [.cacheIntermediates: false])
+    private let warpEngine = FaceWarpEngine()
+
+    public init() {}
+
+    /// Detects the most prominent face in `image` and prepares it as a
+    /// reference. Returns nil when no usable face is found.
+    public func prepareReferenceFace(from image: CIImage, padding: CGFloat = 0.35) -> ReferenceFace? {
+        let extent = image.extent
+        guard extent.width >= 1, extent.height >= 1 else { return nil }
+        guard let cgImage = ciContext.createCGImage(image, from: extent) else { return nil }
+
+        let request = VNDetectFaceLandmarksRequest()
+        request.revision = VNDetectFaceLandmarksRequestRevision3
+        let handler = VNImageRequestHandler(cgImage: cgImage, orientation: .up, options: [:])
+        do {
+            try handler.perform([request])
+        } catch {
+            return nil
+        }
+        guard let face = request.results?.first,
+              let allPoints = face.landmarks?.allPoints else { return nil }
+
+        // Vision face-landmark points are normalized to the *face bounding box*;
+        // combine with the bounding box to obtain image pixel coordinates.
+        let bb = face.boundingBox
+        let imagePoints = allPoints.normalizedPoints.map { point -> CGPoint in
+            CGPoint(x: (CGFloat(point.x) * bb.width + bb.minX) * extent.width,
+                    y: (CGFloat(point.y) * bb.height + bb.minY) * extent.height)
+        }
+        guard imagePoints.count >= 3 else { return nil }
+
+        let faceRect = CGRect(x: bb.minX * extent.width,
+                              y: bb.minY * extent.height,
+                              width: bb.width * extent.width,
+                              height: bb.height * extent.height)
+        var crop = faceRect.insetBy(dx: -faceRect.width * padding, dy: -faceRect.height * padding)
+        crop = crop.intersection(extent)
+        guard crop.width >= 1, crop.height >= 1 else { return nil }
+
+        let patch = image.cropped(to: crop)
+        let patchPoints = imagePoints.map { CGPoint(x: $0.x - crop.minX, y: $0.y - crop.minY) }
+        return ReferenceFace(patch: patch, landmarks: patchPoints, patchRect: crop)
+    }
+
+    /// Warps the reference face onto the live face geometry and composites it
+    /// over `image` using a feathered mask. `blend` is 0...1.
+    public func replaceFace(
+        in image: CIImage,
+        liveLandmarks: [CGPoint],
+        reference: ReferenceFace,
+        blend: Double
+    ) -> CIImage {
+        guard blend > 0.001, liveLandmarks.count >= 3, reference.landmarks.count >= 3 else { return image }
+        let count = min(liveLandmarks.count, reference.landmarks.count)
+        let src = Array(reference.landmarks[0..<count])
+        let dst = Array(liveLandmarks[0..<count])
+        let extent = image.extent
+
+        let warped = warpEngine.warpImage(
+            reference.patch,
+            sourceLandmarks: src,
+            targetLandmarks: dst,
+            outputSize: extent.size,
+            drawBase: false
+        )
+
+        let spread = max(dst.map { $0.x }.max()! - dst.map { $0.x }.min()!,
+                         dst.map { $0.y }.max()! - dst.map { $0.y }.min()!)
+        guard let mask = makeFaceMask(points: dst, extent: extent, blurRadius: max(spread, 20) * 0.06, blend: CGFloat(blend)) else {
+            return image
+        }
+
+        // Composite the warped patch over the original first so any transparent
+        // triangles fall back to the live frame instead of punching a hole, then
+        // feather-blend the full-coverage result through the face mask.
+        let foreground = warped.composited(over: image)
+        let blended = foreground.applyingFilter("CIBlendWithMask", parameters: [
+            kCIInputBackgroundImageKey: image,
+            kCIInputMaskImageKey: mask
+        ])
+        return blended.cropped(to: extent)
+    }
+
+    // MARK: - Mask
+
+    private func makeFaceMask(points: [CGPoint], extent: CGRect, blurRadius: CGFloat, blend: CGFloat) -> CIImage? {
+        let hull = FaceReplaceEngine.convexHull(points)
+        guard hull.count >= 3 else { return nil }
+        guard let context = CGContext(
+            data: nil,
+            width: Int(extent.width),
+            height: Int(extent.height),
+            bitsPerComponent: 8,
+            bytesPerRow: 0,
+            space: CGColorSpaceCreateDeviceRGB(),
+            bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+        ) else { return nil }
+
+        // Expand the hull slightly beyond the landmark extent so the whole face
+        // (including hairline and jaw edges) is covered.
+        let center = hull.average
+        let expanded = hull.map { CGPoint(x: center.x + ($0.x - center.x) * 1.12,
+                                          y: center.y + ($0.y - center.y) * 1.12) }
+
+        context.setFillColor(CGColor(red: 1, green: 1, blue: 1, alpha: 1))
+        context.beginPath()
+        context.move(to: expanded[0])
+        for point in expanded.dropFirst() {
+            context.addLine(to: point)
+        }
+        context.closePath()
+        context.fillPath()
+
+        guard let cgImage = context.makeImage() else { return nil }
+        var mask = CIImage(cgImage: cgImage)
+        if blurRadius > 0.5 {
+            mask = mask
+                .clampedToExtent()
+                .applyingFilter("CIGaussianBlur", parameters: [kCIInputRadiusKey: blurRadius])
+                .cropped(to: extent)
+        }
+        return mask.applyingFilter("CIColorMatrix", parameters: [
+            "inputRVector": CIVector(x: blend, y: 0, z: 0, w: 0),
+            "inputGVector": CIVector(x: 0, y: blend, z: 0, w: 0),
+            "inputBVector": CIVector(x: 0, y: 0, z: blend, w: 0),
+            "inputAVector": CIVector(x: 0, y: 0, z: 0, w: blend)
+        ])
+    }
+
+    /// Andrew's monotone-chain convex hull.
+    static func convexHull(_ points: [CGPoint]) -> [CGPoint] {
+        guard points.count >= 3 else { return points }
+        let sorted = points.sorted { $0.x == $1.x ? $0.y < $1.y : $0.x < $1.x }
+
+        func cross(_ o: CGPoint, _ a: CGPoint, _ b: CGPoint) -> CGFloat {
+            (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x)
+        }
+
+        var lower: [CGPoint] = []
+        for point in sorted {
+            while lower.count >= 2 && cross(lower[lower.count - 2], lower[lower.count - 1], point) <= 0 {
+                lower.removeLast()
+            }
+            lower.append(point)
+        }
+
+        var upper: [CGPoint] = []
+        for point in sorted.reversed() {
+            while upper.count >= 2 && cross(upper[upper.count - 2], upper[upper.count - 1], point) <= 0 {
+                upper.removeLast()
+            }
+            upper.append(point)
+        }
+
+        lower.removeLast()
+        upper.removeLast()
+        return lower + upper
     }
 }

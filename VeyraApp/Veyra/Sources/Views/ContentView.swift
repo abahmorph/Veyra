@@ -2,11 +2,13 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var engine: VeyraEngine
+    @Environment(\.scenePhase) private var scenePhase
     @State private var selectedTab: Tab = .studio
     @State private var showControls = false
+    @State private var selectedPanel: ControlsOverlay.Panel = .face
     
     enum Tab: String {
-        case studio, effects, body, settings
+        case studio, effects, body, swap, settings
     }
     
     var body: some View {
@@ -25,7 +27,7 @@ struct ContentView: View {
             
             // Overlay controls
             if showControls {
-                ControlsOverlay()
+                ControlsOverlay(selectedPanel: $selectedPanel)
                     .environmentObject(engine)
                     .transition(.move(edge: .trailing))
             }
@@ -36,6 +38,18 @@ struct ContentView: View {
         .onDisappear {
             engine.stop()
         }
+        .onChange(of: scenePhase) { newPhase in
+            switch newPhase {
+            case .active:
+                Task { await engine.start() }
+            case .background:
+                engine.stop()
+            case .inactive:
+                break
+            @unknown default:
+                break
+            }
+        }
     }
     
     private var bottomBar: some View {
@@ -43,6 +57,7 @@ struct ContentView: View {
             tabButton(.studio, icon: "camera.fill", label: "Studio")
             tabButton(.effects, icon: "wand.and.stars", label: "Effects")
             tabButton(.body, icon: "figure.stand", label: "Body")
+            tabButton(.swap, icon: "person.2.fill", label: "Swap")
             tabButton(.settings, icon: "gearshape", label: "Settings")
         }
         .background(.ultraThinMaterial)
@@ -53,6 +68,16 @@ struct ContentView: View {
         Button {
             withAnimation(.easeInOut(duration: 0.2)) {
                 selectedTab = tab
+                switch tab {
+                case .studio, .settings:
+                    selectedPanel = .face
+                case .effects:
+                    selectedPanel = .effects
+                case .body:
+                    selectedPanel = .body
+                case .swap:
+                    selectedPanel = .swap
+                }
                 if tab == .studio {
                     showControls.toggle()
                 } else {
@@ -75,10 +100,10 @@ struct ContentView: View {
 
 struct ControlsOverlay: View {
     @EnvironmentObject var engine: VeyraEngine
-    @State private var selectedPanel: Panel = .face
+    @Binding var selectedPanel: Panel
     
     enum Panel: String {
-        case face, body, effects
+        case face, body, swap, effects
     }
     
     var body: some View {
@@ -93,6 +118,7 @@ struct ControlsOverlay: View {
                     HStack(spacing: 8) {
                         panelButton(.face, label: "Face")
                         panelButton(.body, label: "Body")
+                        panelButton(.swap, label: "Swap")
                         panelButton(.effects, label: "FX")
                     }
                     .padding(.horizontal, 16)
@@ -106,6 +132,8 @@ struct ControlsOverlay: View {
                                 FaceControlsPanel()
                             case .body:
                                 BodyControlsPanel()
+                            case .swap:
+                                FaceSwapPanel()
                             case .effects:
                                 EffectsPanel()
                             }

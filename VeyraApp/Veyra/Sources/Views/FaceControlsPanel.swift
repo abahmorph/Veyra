@@ -1,4 +1,5 @@
 import SwiftUI
+import PhotosUI
 
 struct FaceControlsPanel: View {
     @EnvironmentObject var engine: VeyraEngine
@@ -27,6 +28,74 @@ struct FaceControlsPanel: View {
             .foregroundColor(.red)
             .font(.caption)
             .padding(.top, 4)
+        }
+    }
+}
+
+struct FaceSwapPanel: View {
+    @EnvironmentObject var engine: VeyraEngine
+    @State private var pickedItem: PhotosPickerItem?
+
+    var body: some View {
+        VStack(spacing: 10) {
+            Text("Face Replacement")
+                .font(.headline)
+                .foregroundColor(.white)
+            Text("Warps a photo's face onto yours")
+                .font(.caption2)
+                .foregroundColor(.gray)
+
+            PhotosPicker(selection: $pickedItem, matching: .images) {
+                Label(engine.referenceFace == nil ? "Choose Reference Face" : "Change Reference Face",
+                      systemImage: "person.crop.square")
+                    .font(.caption)
+            }
+            .onChange(of: pickedItem) { newItem in
+                guard let newItem = newItem else { return }
+                Task {
+                    if let data = try? await newItem.loadTransferable(type: Data.self) {
+                        await engine.loadReferenceFace(from: data)
+                    } else {
+                        engine.referenceError = "Could not load that photo."
+                    }
+                }
+            }
+
+            if let error = engine.referenceError {
+                Text(error)
+                    .font(.caption2)
+                    .foregroundColor(.orange)
+                    .multilineTextAlignment(.center)
+            }
+
+            Toggle("Enable Swap", isOn: $engine.faceReplaceEnabled)
+                .font(.caption)
+                .foregroundColor(.white)
+                .tint(.blue)
+                .disabled(engine.referenceFace == nil)
+
+            VStack(alignment: .leading, spacing: 2) {
+                HStack {
+                    Text("Blend")
+                        .font(.caption)
+                        .foregroundColor(.gray)
+                    Spacer()
+                    Text(String(format: "%.2f", engine.faceReplaceBlend))
+                        .font(.caption2)
+                        .foregroundColor(.blue)
+                }
+                Slider(value: $engine.faceReplaceBlend, in: 0...1, step: 0.01)
+                    .tint(.blue)
+            }
+
+            Button("Clear Reference") {
+                engine.clearReferenceFace()
+                pickedItem = nil
+            }
+            .foregroundColor(.red)
+            .font(.caption)
+            .padding(.top, 4)
+            .disabled(engine.referenceFace == nil)
         }
     }
 }

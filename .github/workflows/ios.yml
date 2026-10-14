@@ -5,6 +5,7 @@ on:
     branches: [main, develop]
   pull_request:
     branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
@@ -76,3 +77,21 @@ jobs:
           name: Veyra-dSYMs
           path: VeyraApp/build/Veyra.xcarchive/dSYMs
           if-no-files-found: ignore
+
+      - name: Package unsigned device IPA (for sideloading)
+        run: |
+          cd VeyraApp
+          APP_PATH="$(find build/Veyra.xcarchive/Products/Applications -maxdepth 1 -name '*.app' | head -n1)"
+          test -n "$APP_PATH" || { echo "No .app found inside the archive"; exit 1; }
+          echo "Packaging: $APP_PATH"
+          rm -rf build/ipa && mkdir -p build/ipa/Payload
+          cp -R "$APP_PATH" build/ipa/Payload/
+          ( cd build/ipa && zip -qry ../Veyra-unsigned.ipa Payload )
+          ls -la build/Veyra-unsigned.ipa
+
+      - name: Upload unsigned IPA
+        uses: actions/upload-artifact@v4
+        with:
+          name: Veyra-unsigned-ipa
+          path: VeyraApp/build/Veyra-unsigned.ipa
+          if-no-files-found: error

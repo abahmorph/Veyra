@@ -5,6 +5,7 @@ import CoreMedia
 import Metal
 import SwiftUI
 import Combine
+import UIKit
 
 /// A background processor that performs heavy per-frame work
 /// (tracking, warping, effects) off the main actor.
@@ -14,16 +15,19 @@ actor FrameProcessor {
     private let smoother = TemporalSmoother(smoothingFactor: 0.35)
     private let faceWarpEngine = FaceWarpEngine()
     private let bodyWarpEngine = BodyWarpEngine()
+    private let faceReplaceEngine = FaceReplaceEngine()
     private var metalRenderer: MetalRenderer?
 
     private var lastFrameTime: CFAbsoluteTime = 0
     private var frameCount: Int = 0
     private var lastProcessingMs: Double = 0
     private var pipelineRun: UInt64 = 0
+    private var lastBodyMask: CVPixelBuffer?
+    private var droppedFrames: Int = 0
 
-    private var frameHandler: (@Sendable (CIImage, Bool, Double) -> Void)?
+    private var frameHandler: (@Sendable (CIImage, Bool, Double, Int) -> Void)?
 
-    func setFrameHandler(_ handler: @escaping @Sendable (CIImage, Bool, Double) -> Void) {
+    func setFrameHandler(_ handler: @escaping @Sendable (CIImage, Bool, Double, Int) -> Void) {
         frameHandler = handler
     }
 
@@ -41,7 +45,10 @@ actor FrameProcessor {
         mirrored: Bool,
         faceSettings: FaceTransformSettings,
         bodySettings: BodyTransformSettings,
-        effect: String
+        effect: String,
+        referenceFace: ReferenceFace?,
+        faceReplaceEnabled: Bool,
+        faceReplaceBlend: Double
     ) async {
         let now = CFAbsoluteTimeGetCurrent()
         let interval = now - lastFrameTime
@@ -69,15 +76,30 @@ actor FrameProcessor {
         var faceLandmarkData: FaceLandmarkData?
         if let result = smoothedResult {
             hasFace = true
-            sourceLandmarks = result.landmarks.allPoints
+            // Vision face-landmark points are normalized to the face bounding
+            // box; combine with the box to get pixel coordinates.
+            let bb = result.landmarks.boundingBox
+            let pixelWidth = CGFloat(CVPixelBufferGetWidth(pixelBuffer))
+            let pixelHeight = CGFloat(CVPixelBufferGetHeight(pixelBuffer))
+            sourceLandmarks = result.landmarks.allPoints.map { point in
+                CGPoint(x: (point.x * bb.width + bb.minX) * pixelWidth,
+                        y: (point.y * bb.height + bb.minY) * pixelHeight)
+            }
             faceLandmarkData = result.landmarks
         }
 
-        // 3. Body tracking (throttled) used when body transform is active
+        // 3. Body tracking (throttled) used when body transform is active.
+        // Keep the most recent mask so throttled frames still apply the body
+        // transform instead of silently dropping it.
         var bodyMask: CVPixelBuffer?
         if bodySettings.hasModifications {
             let body = await bodyTracker.track(pixelBuffer, throttleMs: 100)
-            bodyMask = body.mask
+            if let newMask = body.mask {
+                lastBodyMask = newMask
+            }
+            bodyMask = body.mask ?? lastBodyMask
+        } else {
+            lastBodyMask = nil
         }
 
         // 4. Build the working image
@@ -90,18 +112,28 @@ actor FrameProcessor {
             outputImage = outputImage.oriented(.upMirrored)
         }
 
-        // 5. Face geometric transformation
+        // 5. Reference-face replacement (applied before reshaping so the
+        // geometric reshape also affects the swapped face).
+        if faceReplaceEnabled, let reference = referenceFace, hasFace, sourceLandmarks.count >= 3 {
+            outputImage = faceReplaceEngine.replaceFace(
+                in: outputImage,
+                liveLandmarks: sourceLandmarks,
+                reference: reference,
+                blend: faceReplaceBlend
+            )
+        }
+
+        // 6. Face geometric transformation
         if hasFace, faceSettings.hasModifications, !sourceLandmarks.isEmpty {
-            let sourcePts = sourceLandmarks.map { CGPoint(x: $0.x * width, y: $0.y * height) }
             let targetPts = faceWarpEngine.computeWarpedLandmarks(
-                originalLandmarks: sourcePts,
+                originalLandmarks: sourceLandmarks,
                 settings: faceSettings,
                 imageWidth: width,
                 imageHeight: height
             )
             outputImage = faceWarpEngine.warpImage(
                 outputImage,
-                sourceLandmarks: sourcePts,
+                sourceLandmarks: sourceLandmarks,
                 targetLandmarks: targetPts
             )
         }
@@ -125,12 +157,17 @@ actor FrameProcessor {
 
         lastProcessingMs = (CFAbsoluteTimeGetCurrent() - startMs) * 1000
 
-        // Publish the latest frame only
-        guard thisRun == pipelineRun else { return }
+        // Publish the latest frame only. Frames superseded by a newer one were
+        // effectively dropped by the pipeline, so surface that honestly.
+        guard thisRun == pipelineRun else {
+            droppedFrames += 1
+            return
+        }
         let finalImage = outputImage
         let finalHasFace = hasFace
         let finalMs = lastProcessingMs
-        frameHandler?(finalImage, finalHasFace, finalMs)
+        let finalDropped = droppedFrames
+        frameHandler?(finalImage, finalHasFace, finalMs, finalDropped)
     }
 }
 
@@ -153,6 +190,11 @@ public final class VeyraEngine: ObservableObject {
     }
     @Published public var previewImage: CIImage?
 
+    @Published public var referenceFace: ReferenceFace?
+    @Published public var faceReplaceEnabled = false
+    @Published public var faceReplaceBlend: Double = 1.0
+    @Published public var referenceError: String?
+
     public let cameraManager = CameraManager()
 
     private var processor: FrameProcessor?
@@ -168,7 +210,7 @@ public final class VeyraEngine: ObservableObject {
 
         Task { @MainActor in
             await proc.configure()
-            await proc.setFrameHandler { [weak self] image, hasFace, ms in
+            await proc.setFrameHandler { [weak self] image, hasFace, ms, dropped in
                 Task { @MainActor in
                     guard let self else { return }
                     self.fpsCounter += 1
@@ -184,7 +226,7 @@ public final class VeyraEngine: ObservableObject {
                     self.performanceStats = PerformanceStats(
                         fps: self.currentFPS,
                         processingMs: ms,
-                        droppedFrames: 0
+                        droppedFrames: dropped
                     )
                 }
             }
@@ -197,6 +239,9 @@ public final class VeyraEngine: ObservableObject {
             let fSettings = self.faceSettings
             let bSettings = self.bodySettings
             let effect = self.currentEffect
+            let reference = self.referenceFace
+            let replaceEnabled = self.faceReplaceEnabled && self.referenceFace != nil
+            let replaceBlend = self.faceReplaceBlend
             let captured = self.processor
             Task {
                 await captured?.process(
@@ -204,7 +249,10 @@ public final class VeyraEngine: ObservableObject {
                     mirrored: mirrored,
                     faceSettings: fSettings,
                     bodySettings: bSettings,
-                    effect: effect
+                    effect: effect,
+                    referenceFace: reference,
+                    faceReplaceEnabled: replaceEnabled,
+                    faceReplaceBlend: replaceBlend
                 )
             }
         }
@@ -240,6 +288,33 @@ public final class VeyraEngine: ObservableObject {
 
     public func setEffect(_ effect: String) {
         currentEffect = effect
+    }
+
+    /// Decodes a picked photo, detects its face and prepares it as the swap
+    /// reference. Runs the Vision detection off the main actor.
+    public func loadReferenceFace(from data: Data) async {
+        guard let uiImage = UIImage(data: data), let ciImage = CIImage(image: uiImage) else {
+            referenceError = "Could not read that photo."
+            return
+        }
+        let prepared = await Task.detached(priority: .userInitiated) {
+            FaceReplaceEngine().prepareReferenceFace(from: ciImage)
+        }.value
+
+        if let prepared = prepared {
+            referenceFace = prepared
+            referenceError = nil
+            faceReplaceEnabled = true
+        } else {
+            referenceFace = nil
+            referenceError = "No face detected in that photo."
+        }
+    }
+
+    public func clearReferenceFace() {
+        referenceFace = nil
+        referenceError = nil
+        faceReplaceEnabled = false
     }
 
     private func saveSettings() {
